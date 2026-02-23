@@ -1,6 +1,5 @@
 package main
 
-import "fmt"
 
 type Parameters struct {
 	theta0 float64

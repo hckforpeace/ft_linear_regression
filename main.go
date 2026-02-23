@@ -78,7 +78,6 @@ func main() {
 	}
 	p.Add(scatter)
 
-
 	parameters, err := readProcessCsvParametersDataSet(ParametersFile)
 	if err != nil {
 		log.Fatal(err)
