@@ -1,16 +1,21 @@
 package main
 
+type NormalizeRow struct {
+	km    float64
+	price float64
+}
+
 type Cost struct {
-	costs            map[float64]float64
+	// costs            map[float64]float64
+	data             []NormalizeRow
 	min              float64
 	max              float64
 	overAllCostTeta0 float64
 	overAllCostTeta1 float64
 }
 
-
 func NewCost(set *DataSet) *Cost {
-	cost := &Cost{costs: make(map[float64]float64)}
+	cost := &Cost{data: make([]NormalizeRow, 0, len(set.rows))}
 	if len(set.rows) == 0 {
 		return cost
 	}
@@ -32,7 +37,7 @@ func NewCost(set *DataSet) *Cost {
 		if rangeKm != 0 {
 			kmNorm = (row.km - minKm) / rangeKm
 		}
-		cost.costs[kmNorm] = row.price
+		cost.data = append(cost.data, NormalizeRow{km: kmNorm, price: row.price})
 	}
 	return cost
 }
@@ -43,12 +48,12 @@ func (c *Cost) ComputeCosts(params *Parameters) {
 	var overAllCostTeta0 float64
 	var overAllCostTeta1 float64
 
-	size := len(c.costs)
-	for kmNorm, price := range c.costs {
-		predictedPrice = params.Proccess(kmNorm)
-		cost = predictedPrice - price
+	size := len(c.data)
+	for _, normalisedRow := range c.data {
+		predictedPrice = params.Process(normalisedRow.km)
+		cost = predictedPrice - normalisedRow.price
 		overAllCostTeta0 += cost
-		overAllCostTeta1 += cost * kmNorm
+		overAllCostTeta1 += cost * normalisedRow.km
 	}
 
 	overAllCostTeta0 = overAllCostTeta0 / float64(size)
@@ -59,6 +64,6 @@ func (c *Cost) ComputeCosts(params *Parameters) {
 
 func (c *Cost) Denormalise(params *Parameters) {
 	rangeKm := c.max - c.min
-	params.teta1 = params.teta1 / rangeKm
-	params.teta0 = params.teta0 - (params.teta1 * c.min)
+	params.theta1 = params.theta1 / rangeKm
+	params.theta0 = params.theta0 - (params.theta1 * c.min)
 }

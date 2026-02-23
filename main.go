@@ -12,7 +12,13 @@ import (
 	"gonum.org/v1/plot/vg"
 )
 
-func readProcessCsvtrainingDataSet(filename string) (*DataSet, error) {
+const (
+	TrainingDataFile = "data.csv"
+	ParametersFile   = "parameters.csv"
+	OutputPlotFile   = "scatter.png"
+)
+
+func readProcessCsvTrainingDataSet(filename string) (*DataSet, error) {
 	trainingCsvData, err := readData(filename)
 	if err != nil {
 		return nil, err
@@ -39,26 +45,25 @@ func readProcessCsvParametersDataSet(filename string) (*Parameters, error) {
 		return nil, errors.New("Error: wrong format")
 	}
 
-	teta0, err := strconv.ParseFloat(paramsCsvData[1][0], 64)
+	theta0, err := strconv.ParseFloat(paramsCsvData[1][0], 64)
 	if err != nil {
 		return nil, err
 	}
 
-	teta1, err := strconv.ParseFloat(paramsCsvData[1][1], 64)
+	theta1, err := strconv.ParseFloat(paramsCsvData[1][1], 64)
 	if err != nil {
 		return nil, err
 	}
 
-	parameters := NewParameters(teta0, teta1)
+	parameters := NewParameters(theta0, theta1)
 
 	return parameters, nil
 }
 
 func main() {
-	trainingSet, err := readProcessCsvtrainingDataSet("data.csv")
+	trainingSet, err := readProcessCsvTrainingDataSet(TrainingDataFile)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
 
 	p := plot.New()
@@ -67,33 +72,34 @@ func main() {
 	p.Y.Label.Text = "Price"
 
 	points := plotter.XYs(toXYs(trainingSet))
-	scatter, _ := plotter.NewScatter(points)
-	p.Add(scatter)
-
-	// trainingSet.DisplaySataSet()
-
-	parameters, err := readProcessCsvParametersDataSet("parameters.csv")
+	scatter, err := plotter.NewScatter(points)
 	if err != nil {
 		log.Fatal(err)
-		return
+	}
+	p.Add(scatter)
+
+
+	parameters, err := readProcessCsvParametersDataSet(ParametersFile)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	cost := NewCost(trainingSet)
 
 	gd := GradientDescent{LearningRate: 0.01, IterationNumber: 1000000}
 
-	gd.gradient_descent(parameters, trainingSet, cost)
+	gd.gradientDescent(parameters, trainingSet, cost)
 
 	cost.Denormalise(parameters)
-	fmt.Printf("teta0: %v, teta1: %v\n", parameters.teta0, parameters.teta1)
+	fmt.Printf("teta0: %v, teta1: %v\n", parameters.theta0, parameters.theta1)
 
 	line := plotter.NewFunction(func(x float64) float64 {
-		return parameters.teta0 + parameters.teta1*x
+		return parameters.theta0 + parameters.theta1*x
 	})
 	line.Color = color.RGBA{R: 255, A: 255}
 	p.Add(line)
 
-	if err := p.Save(6*vg.Inch, 4*vg.Inch, "scatter.png"); err != nil {
+	if err := p.Save(6*vg.Inch, 4*vg.Inch, OutputPlotFile); err != nil {
 		log.Fatal(err)
 	}
 }

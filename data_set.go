@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"strconv"
 )
 
@@ -20,17 +20,15 @@ func NewDataSet(data []Row) *DataSet {
 	return trainingSet
 }
 
-func (ds *DataSet) DisplaySataSet() {
-	for _, row := range ds.rows {
-		fmt.Printf("kilometers: %v, price: %v\n", row.km, row.price)
-	}
-}
-
 func ConvertDataStringToRow(csvData [][]string) ([]Row, error) {
 	dataSetConverted := make([]Row, 0, len(csvData)-1)
 	for idx, row := range csvData {
 		if idx == 0 {
 			continue
+		}
+
+		if len(row) != 2 {
+			log.Fatal("CSV Wrong Format !!")
 		}
 
 		km, err := strconv.ParseFloat(row[0], 64)
