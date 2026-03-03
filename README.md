@@ -151,3 +151,9 @@ After training, a scatter plot with the regression line is saved to `images/scat
 The plot shows:
 - **Blue dots**: the training data (km vs price)
 - **Red line**: the learned linear model $h_\theta(x) = \theta_0 + \theta_1 \cdot x$
+
+### Gradient Descent Convergence
+
+![Gradient descent](images/gradient_descent.png)
+
+*Gradient descent iteratively moving toward the minimum of the cost function.*
