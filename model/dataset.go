@@ -3,6 +3,7 @@ package model
 import (
 	"log"
 	"strconv"
+	"math"
 )
 
 type Row struct {
@@ -17,6 +18,17 @@ type DataSet struct {
 
 func NewDataSet(data []Row) *DataSet {
 	return &DataSet{Rows: data, Size: len(data)}
+}
+
+func (ds *DataSet) ComputeMSE(p *Parameters) float64 {
+	var sum float64
+
+	for _, row := range ds.Rows {
+		sum += math.Pow(p.Process(row.Km) - row.Price, 2)
+	}
+	result := sum / (float64)(len(ds.Rows))
+
+	return result
 }
 
 func ConvertDataStringToRow(csvData [][]string) ([]Row, error) {
